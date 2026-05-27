@@ -14,7 +14,7 @@ class TweetStatus(StrEnum):
     REPLY = "REPLY"
 
 
-def load_json():
+def _load_json():
     with open("tweets_data/data/tweets.js", "r", encoding="utf-8") as data:
         content = data.read()
 
@@ -28,7 +28,7 @@ def load_json():
         return []
 
 
-def get_tweet_status(tweet_data: dict) -> TweetStatus:
+def _get_tweet_status(tweet_data: dict) -> TweetStatus:
     full_text = tweet_data.get("full_text", "")
     retweeted = tweet_data.get("retweeted", False)
     in_reply_to = tweet_data.get("in_reply_to_user_id_str", "")
@@ -40,12 +40,12 @@ def get_tweet_status(tweet_data: dict) -> TweetStatus:
     return TweetStatus.POST
 
 
-def build_url(id_str: str) -> str:
+def _build_url(id_str: str) -> str:
     username = config["account_context"]["username"]
     return f"https://x.com/{username}/status/{id_str}"
 
 
-def is_too_short(tweets: str):
+def _is_too_short(tweets: str):
     min_length = config["filter_settings"]["min_length"]
     for tweet in tweets:
         tweet_data = tweet.get("tweet", {})
@@ -54,7 +54,7 @@ def is_too_short(tweets: str):
                 return True
         return False
 
-def parse_created_at(tweets: str):
+def _parse_created_at(tweets: str):
     date_format = "%a %b %d %H:%M:%S %z %Y"
     for tweet in tweets:
         tweets_data = tweet.get("tweet", {})
@@ -63,11 +63,11 @@ def parse_created_at(tweets: str):
         return py_date
 
 def process_tweets() -> list[dict]:
-    tweets_list = load_json()
+    tweets_list = _load_json()
     processed = []
 
     for item in tweets_list:
-        if not is_too_short(tweets_list):
+        if not _is_too_short(tweets_list):
             tweet_data = item.get("tweet", {})
             id_str = tweet_data.get("id_str")
             full_text = tweet_data.get("full_text", "")
@@ -76,9 +76,9 @@ def process_tweets() -> list[dict]:
                 logger.warning(f"Skipping tweet with missing id_str or full_text")
                 continue
 
-            status = get_tweet_status(tweet_data)
-            url = build_url(id_str)
-            created_at = parse_created_at(tweets_list)
+            status = _get_tweet_status(tweet_data)
+            url = _build_url(id_str)
+            created_at = _parse_created_at(tweets_list)
 
             processed.append({
                 "id_str": id_str,
