@@ -1,0 +1,83 @@
+{
+  "gemini_api_key": "YOUR_GEMINI_API_KEY_HERE",
+
+  "account_context": {
+    "username": "Your username",
+    "account_purpose": "your_account_purpose",
+    "audience": "anyone",
+    "account_tone": "professional, funny yet approachable"
+  },
+
+  "prompt_settings": {
+    "system_instruction": "You are a professional content moderation assistant. Your job is to review tweets from a specific X (Twitter) account and determine whether each tweet is aligned with the account's values and professional standards. You must be consistent, fair, and precise. When in doubt, do not flag. Only flag tweets you are highly confident violate the provided criteria.",
+    "flag_threshold": 0.7,
+    "require_reasoning": true,
+    "reasoning_detail": "concise",
+    "response_format": "json",
+    "json_schema": {
+      "flagged": "boolean — true if the tweet should be deleted",
+      "confidence": "float between 0.0 and 1.0 — how confident you are in the flag decision",
+      "reason": "string — one sentence explaining why the tweet was flagged, or null if not flagged",
+      "violated_criteria": "array of strings — which specific criteria were violated, or empty array if none"
+    }
+  },
+
+  "alignment_criteria": {
+    "context": "How aligned your tweets are",
+    "forbidden_words": [
+
+    ],
+    "forbidden_phrases": [
+
+    ],
+    "professional_check": true,
+    "tone": "respectful and thoughtful",
+    "allowed_tones": [
+    ],
+    "disallowed_topics": [
+
+    ],
+    "exclude_politics": true,
+    "exclude_personal_info": false,
+    "min_engagement_threshold": 0,
+    "max_age_days": null
+  },
+
+  "filter_settings": {
+    "skip_retweets": true,
+    "skip_replies": false,
+    "skip_quotes": false,
+    "min_length": 3,
+    "skip_urls_only": true
+  },
+
+  "gemini_settings": {
+    "model": "gemini-1.5-flash",
+    "temperature": 0.3,
+    "max_tokens": 500,
+    "retry_attempts": 3,
+    "retry_delay_seconds": 2,
+    "timeout_seconds": 30,
+    "safety_settings": {
+      "harassment": "BLOCK_ONLY_HIGH",
+      "hate_speech": "BLOCK_ONLY_HIGH",
+      "sexually_explicit": "BLOCK_ONLY_HIGH",
+      "dangerous_content": "BLOCK_ONLY_HIGH"
+    }
+  },
+
+  "output_settings": {
+    "output_dir": "output",
+    "filename": "flagged_tweets.csv",
+    "include_reasons": true,
+    "include_confidence": true,
+    "include_violated_criteria": true,
+    "batch_size": 10,
+    "dry_run": false
+  },
+
+  "archive_settings": {
+    "archive_path": "your_tweets_archive_path",
+    "tweets_json_path": "data/tweets.js"
+  }
+}

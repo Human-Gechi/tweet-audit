@@ -1,2 +1,7 @@
 .env
 *.zip
+tweet*
+.venv
+config.json
+tweet_audit.log
+__pycache__
