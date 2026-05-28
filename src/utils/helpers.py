@@ -1,9 +1,10 @@
 from enum import StrEnum
 import json
+import csv
+import os
 from log import tweet_logger
 from src.utils.config_validate import load_config
 from datetime import datetime
-
 logger = tweet_logger()
 config = load_config()
 
@@ -15,7 +16,7 @@ class TweetStatus(StrEnum):
 
 
 def _load_json():
-    with open("tweets_data/data/tweets.js", "r", encoding="utf-8") as data:
+    with open("tweet_data/data/tweets.js", "r", encoding="utf-8") as data:
         content = data.read()
 
     json_string = content[content.find('['):content.rfind(']') + 1]
@@ -81,18 +82,51 @@ def process_tweets() -> list[dict]:
             created_at = _parse_created_at(tweets_list)
 
             processed.append({
-                "id_str": id_str,
+                "url": url,
                 "full_text": full_text,
                 "status": status,
-                "url": url,
                 "created_at": created_at
             })
 
     logger.info(f"Processed {len(processed)} tweets")
     return processed
 
-#if __name__ == "__main__":
-    #tweets = process_tweets()
-    #for tweet in tweets[:5]:
-    #    print(f"{tweet['status']} — {tweet['created_at']} — {tweet["lang"]}")
-    #    print(f"  {tweet['full_text'][:80]}")
+def output_csv(flagged_tweets: list[dict]) -> None:
+    output_settings = config["output_settings"]
+    output_dir = output_settings["output_dir"]
+    filename = output_settings["filename"]
+
+    base_fields = ["url", "deleted"]
+    extra_fields = []
+
+    for item in flagged_tweets:
+        for key in item.keys():
+            if key not in  {"url", "full_text", "status", "created_at"} and key not in extra_fields:
+                extra_fields.append(key)
+
+    fieldnames = base_fields + extra_fields
+
+    rows = []
+    for tweet in flagged_tweets:
+        row = {
+            "url": tweet.get("url", ""),
+            "deleted": "false",
+        }
+
+        for key in extra_fields:
+            value = tweet.get(key, "")
+            if isinstance(value, list):
+                value = "|".join(value)
+            row[key] = value
+
+        rows.append(row)
+
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, filename)
+
+    with open(output_path, "w", newline="", encoding="utf-8") as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(rows)
+
+    logger.info(f"CSV written to {output_path} with {len(rows)} flagged tweets")

@@ -8,9 +8,9 @@ from log import tweet_logger
 config_path = Path("config.json")
 
 VALID_GEMINI_MODELS = {
-    "gemini-ultra",
-    "gemini-1.5-pro",
-    "gemini-1.5-flash"
+    "gemini-2.5-flash",
+    "gemini-3.5-flash",
+    "gemini-2.5-pro"
 }
 
 logger = tweet_logger()
@@ -71,21 +71,6 @@ def _validate_criteria(c: dict) -> dict:
 
     if not isinstance(c.get("professional_check"), bool):
         errors.append("alignment_criteria.professional_check must be true or false")
-
-    if not isinstance(c.get("exclude_politics"), bool):
-        errors.append("alignment_criteria.exclude_politics must be true or false")
-
-    if not isinstance(c.get("exclude_personal_info"), bool):
-        errors.append("alignment_criteria.exclude_personal_info must be true or false")
-
-    threshold = c.get("min_engagement_threshold", 0)
-    if not isinstance(threshold, int) or threshold < 0:
-        errors.append("alignment_criteria.min_engagement_threshold must be a non-negative integer")
-
-    max_age = c.get("max_age_days")
-    if max_age is not None:
-        if not isinstance(max_age, int) or max_age <= 0:
-            errors.append("alignment_criteria.max_age_days must be a positive integer or null")
 
     allowed = c.get("allowed_tones", [])
     if not isinstance(allowed, list) or not allowed:
@@ -168,7 +153,7 @@ def load_config() -> dict:
             raise ValueError(f"config.json is not valid JSON: {exc}") from exc
         return raw
 
-def main() -> None:
+def validate() -> None:
     config = load_config()
     config = _require_env_fallback(config)
 
@@ -193,4 +178,3 @@ def main() -> None:
     logger.info("config: loaded successfully from %s", config_path.resolve())
     return config
 
-main()

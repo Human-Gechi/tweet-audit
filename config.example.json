@@ -36,19 +36,11 @@
     ],
     "disallowed_topics": [
 
-    ],
-    "exclude_politics": true,
-    "exclude_personal_info": false,
-    "min_engagement_threshold": 0,
-    "max_age_days": null
+    ]
   },
 
   "filter_settings": {
-    "skip_retweets": true,
-    "skip_replies": false,
-    "skip_quotes": false,
-    "min_length": 3,
-    "skip_urls_only": true
+    "min_length": 3
   },
 
   "gemini_settings": {
@@ -71,9 +63,7 @@
     "filename": "flagged_tweets.csv",
     "include_reasons": true,
     "include_confidence": true,
-    "include_violated_criteria": true,
-    "batch_size": 10,
-    "dry_run": false
+    "include_violated_criteria": true
   },
 
   "archive_settings": {
