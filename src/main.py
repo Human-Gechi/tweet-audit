@@ -1,7 +1,7 @@
 from src.archive_parser import unzip
 from src.utils.helpers import load_config
 from src.utils.config_validate import validate
-from src.gemini_analyzer import parse_output
+from src.groq import parse_output
 from log import tweet_logger
 
 logger = tweet_logger()

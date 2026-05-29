@@ -16,6 +16,7 @@ class TweetStatus(StrEnum):
 
 
 def _load_json():
+    "Load json object containing tweets data"
     with open("tweet_data/data/tweets.js", "r", encoding="utf-8") as data:
         content = data.read()
 
@@ -30,6 +31,7 @@ def _load_json():
 
 
 def _get_tweet_status(tweet_data: dict) -> TweetStatus:
+    "Get tweet status using StrEnum"
     full_text = tweet_data.get("full_text", "")
     retweeted = tweet_data.get("retweeted", False)
     in_reply_to = tweet_data.get("in_reply_to_user_id_str", "")
@@ -42,11 +44,13 @@ def _get_tweet_status(tweet_data: dict) -> TweetStatus:
 
 
 def _build_url(id_str: str) -> str:
+    "Function to build URLS in a tweet status"
     username = config["account_context"]["username"]
     return f"https://x.com/{username}/status/{id_str}"
 
 
 def _is_too_short(tweets: str):
+    "Checks if a tweet is too short"
     min_length = config["filter_settings"]["min_length"]
     for tweet in tweets:
         tweet_data = tweet.get("tweet", {})
@@ -56,6 +60,7 @@ def _is_too_short(tweets: str):
         return False
 
 def _parse_created_at(tweets: str):
+    "Convert date/time to python datetime"
     date_format = "%a %b %d %H:%M:%S %z %Y"
     for tweet in tweets:
         tweets_data = tweet.get("tweet", {})
@@ -64,6 +69,7 @@ def _parse_created_at(tweets: str):
         return py_date
 
 def process_tweets() -> list[dict]:
+    """ Funtion to return needed key:vale pairs to process dicts"""
     tweets_list = _load_json()
     processed = []
 
@@ -92,11 +98,12 @@ def process_tweets() -> list[dict]:
     return processed
 
 def output_csv(flagged_tweets: list[dict]) -> None:
+    """CSV file output parser"""
     output_settings = config["output_settings"]
     output_dir = output_settings["output_dir"]
     filename = output_settings["filename"]
 
-    base_fields = ["url", "deleted"]
+    base_fields = ["url", "status", "created_at", "deleted"]
     extra_fields = []
 
     for item in flagged_tweets:
@@ -110,6 +117,8 @@ def output_csv(flagged_tweets: list[dict]) -> None:
     for tweet in flagged_tweets:
         row = {
             "url": tweet.get("url", ""),
+            "status": tweet.get("status", ""),
+            "created_at": tweet.get("created_at", ""),
             "deleted": "false",
         }
 

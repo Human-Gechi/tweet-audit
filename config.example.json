@@ -15,7 +15,6 @@
     "reasoning_detail": "concise",
     "response_format": "json",
     "json_schema": {
-      "flagged": "boolean — true if the tweet should be deleted",
       "confidence": "float between 0.0 and 1.0 — how confident you are in the flag decision",
       "reason": "string — one sentence explaining why the tweet was flagged, or null if not flagged",
       "violated_criteria": "array of strings — which specific criteria were violated, or empty array if none"
@@ -43,19 +42,14 @@
     "min_length": 3
   },
 
-  "gemini_settings": {
-    "model": "gemini-1.5-flash",
+   "groq_settings": {
+    "model": "llama-3.3-70b-versatile",
     "temperature": 0.3,
-    "max_tokens": 500,
+    "max_tokens": 1024,
     "retry_attempts": 3,
     "retry_delay_seconds": 2,
     "timeout_seconds": 30,
-    "safety_settings": {
-      "harassment": "BLOCK_ONLY_HIGH",
-      "hate_speech": "BLOCK_ONLY_HIGH",
-      "sexually_explicit": "BLOCK_ONLY_HIGH",
-      "dangerous_content": "BLOCK_ONLY_HIGH"
-    }
+    "max_retry_delay": 30
   },
 
   "output_settings": {
@@ -63,7 +57,8 @@
     "filename": "flagged_tweets.csv",
     "include_reasons": true,
     "include_confidence": true,
-    "include_violated_criteria": true
+    "include_violated_criteria": true,
+    "batch_size": 10
   },
 
   "archive_settings": {

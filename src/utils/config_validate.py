@@ -7,11 +7,11 @@ from log import tweet_logger
 
 config_path = Path("config.json")
 
-VALID_GEMINI_MODELS = {
-    "gemini-2.5-flash",
-    "gemini-3.5-flash",
-    "gemini-2.5-pro"
-}
+VALID_GROQ_MODELS = [
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+    "meta-llama/llama-4-scout-17b-16e-instruct"
+]
 
 logger = tweet_logger()
 
@@ -42,21 +42,22 @@ def _require_env_fallback(config: dict) -> dict:
     Get value for key: gemini_api_key. If Blank, try GEMINI_API_KEY env var.
     Raises if neither source provides a real key.
     """
-    key = config.get("gemini_api_key", "").strip()
+    key = config.get("groq_api_key", "").strip()
 
     if not key:
-        env_key = os.environ.get("GEMINI_API_KEY", "").strip()
+        env_key = os.environ.get("GROQ_API_KEY", "").strip()
         if not env_key:
             raise ValueError(
                 "gemini_api_key is missing. "
                 "Set it in config.json or export/set GEMINI_API_KEY=<your-gemini-key> in terminal"
             )
         logger.info("config: using GEMINI_API_KEY from environment variable")
-        config["gemini_api_key"] = env_key
+        config["groq_api_key"] = env_key
 
     return config
 
 def _validate_criteria(c: dict) -> dict:
+    "Validate these criterias exists in the config file"
     errors: list[str] = []
 
     c["forbidden_words"] = _clean_string_list(
@@ -78,18 +79,19 @@ def _validate_criteria(c: dict) -> dict:
     return c, errors
 
 
-def _validate_gemini(g: dict) -> tuple[dict, list[str]]:
+def _validate_groq(g: dict) -> tuple[dict, list[str]]:
+    "Validate groq settigns exists in the config file"
     errors: list[str] = []
 
-    if g.get("model") not in VALID_GEMINI_MODELS:
+    if g.get("model") not in VALID_GROQ_MODELS:
         errors.append(
-            f"gemini_settings.model must be one of {sorted(VALID_GEMINI_MODELS)}, "
+            f"groq_settings.model must be one of {sorted(VALID_GROQ_MODELS)}, "
             f"got: {g.get('model')!r}"
         )
 
     temp = g.get("temperature", 0.3)
     if not isinstance(temp, (int, float)) or not (0.0 <= temp <= 1.0):
-        errors.append("gemini_settings.temperature must be a float between 0.0 and 1.0")
+        errors.append("groq_settings.temperature must be a float between 0.0 and 1.0")
 
     for int_field, minimum in [
         ("max_tokens", 1),
@@ -107,6 +109,7 @@ def _validate_gemini(g: dict) -> tuple[dict, list[str]]:
 
 
 def _validate_output(o: dict) -> tuple[dict, list[str]]:
+    """ Validate output configurations are present in the file"""
     errors: list[str] = []
 
     filename = o.get("filename", "")
@@ -128,6 +131,7 @@ def _validate_output(o: dict) -> tuple[dict, list[str]]:
     return o, errors
 
 def _validate_archive(a: dict) -> tuple[dict, list[str]]:
+    "Validate tweet archive file configurations exists"
     errors: list[str] = []
 
     tweets_path = a.get("tweets_json_path", "")
@@ -138,7 +142,7 @@ def _validate_archive(a: dict) -> tuple[dict, list[str]]:
     return a, errors
 
 def load_config() -> dict:
-
+    """ Load the contents onf th config file """
     global config_path
     if not config_path.exists():
         raise FileNotFoundError(
@@ -154,6 +158,7 @@ def load_config() -> dict:
         return raw
 
 def validate() -> None:
+    " Program entry point to run all functions"
     config = load_config()
     config = _require_env_fallback(config)
 
@@ -162,7 +167,7 @@ def validate() -> None:
     config["alignment_criteria"], errs = _validate_criteria(config["alignment_criteria"])
     all_errors.extend(errs)
 
-    config["gemini_settings"], errs = _validate_gemini(config["gemini_settings"])
+    config["gemini_settings"], errs = _validate_groq(config["groq_settings"])
     all_errors.extend(errs)
 
     config["output_settings"], errs = _validate_output(config["output_settings"])

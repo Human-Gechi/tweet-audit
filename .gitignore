@@ -5,3 +5,4 @@ tweet*
 config.json
 tweet_audit.log
 __pycache__
+output

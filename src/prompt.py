@@ -4,7 +4,7 @@ config = load_config()
 
 
 def build_prompt(full_text: str) -> str:
-   "Function to build Gemini prompt with system configurations and prompt detailing how the llm API should behave"
+   "Function to build Groq prompt with system configurations and prompt detailing how the llm API should behave"
    criteria = config["alignment_criteria"]
    account = config["account_context"]
    prompt_settings = config["prompt_settings"]
