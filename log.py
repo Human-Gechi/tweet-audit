@@ -4,6 +4,7 @@ from pathlib import Path
 
 LOG_FORMAT = "%(asctime)s - %(levelname)s - %(message)s"
 
+
 # Logger build func
 def _build_logger(name: str, file_path: Path) -> logging.Logger:
     logger = logging.getLogger(name)
@@ -35,5 +36,6 @@ def tweet_logger():
     tweet_log_file_path.touch(exist_ok=True)
 
     return _build_logger("logger", tweet_log_file_path)
+
 
 tweet_logger()

@@ -15,6 +15,7 @@ groq_settings = config["groq_settings"]
 
 client = Groq(api_key=config["groq_api_key"])
 
+
 def extract_json(text: str) -> dict:
     """Extract JSON from Groq response text"""
     start = text.find("{")
@@ -22,6 +23,7 @@ def extract_json(text: str) -> dict:
     if start == -1 or end == 0:
         raise ValueError("No JSON object found in response")
     return json.loads(text[start:end])
+
 
 def _generate_with_retries(prompt: str, system_instruction: str) -> dict:
     """Generate responses with exponential backoff and model fallback"""
@@ -31,7 +33,9 @@ def _generate_with_retries(prompt: str, system_instruction: str) -> dict:
     backoff_factor = groq_settings.get("backoff_factor", 2)
 
     primary_model = groq_settings.get("model", VALID_GROQ_MODELS[0])
-    fallback_models = [primary_model] + [m for m in VALID_GROQ_MODELS if m != primary_model]
+    fallback_models = [primary_model] + [
+        m for m in VALID_GROQ_MODELS if m != primary_model
+    ]
 
     last_exc = None
 
@@ -44,18 +48,12 @@ def _generate_with_retries(prompt: str, system_instruction: str) -> dict:
             resp = client.chat.completions.create(
                 model=model,
                 messages=[
-                    {
-                        "role": "system",
-                        "content": system_instruction
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user", "content": prompt},
                 ],
                 temperature=groq_settings.get("temperature", 0.7),
                 max_tokens=groq_settings.get("max_tokens", 1024),
-                response_format={"type": "json_object"}
+                response_format={"type": "json_object"},
             )
 
             return resp
@@ -68,7 +66,9 @@ def _generate_with_retries(prompt: str, system_instruction: str) -> dict:
                 logger.error(f"Non-retryable error: {error_msg}")
                 raise
 
-            logger.warning(f"Retryable error on attempt {attempt}/{max_attempts}: {error_msg}")
+            logger.warning(
+                f"Retryable error on attempt {attempt}/{max_attempts}: {error_msg}"
+            )
 
         if attempt < max_attempts:
             delay = min(base_delay * (backoff_factor ** (attempt - 1)), max_delay)
@@ -83,6 +83,7 @@ def _generate_with_retries(prompt: str, system_instruction: str) -> dict:
 
     raise RuntimeError("All attempts exhausted without explicit exception")
 
+
 def analyse_tweet(full_text: str) -> dict:
     """Function to analyse tweet using groq"""
     system_instruction = get_system_instruction()
@@ -96,7 +97,7 @@ def analyse_tweet(full_text: str) -> dict:
             "flagged": False,
             "confidence": 0.0,
             "reason": "request failed",
-            "violated_criteria": []
+            "violated_criteria": [],
         }
 
     try:
@@ -104,14 +105,17 @@ def analyse_tweet(full_text: str) -> dict:
         return result
     except (json.JSONDecodeError, ValueError, AttributeError, IndexError) as e:
         logger.error(f"Failed to parse response: {e}")
-        response_text = getattr(resp.choices[0].message, 'content', None) if resp else None
+        response_text = (
+            getattr(resp.choices[0].message, "content", None) if resp else None
+        )
         logger.error(f"Response text: {response_text}")
         return {
             "flagged": False,
             "confidence": 0.0,
             "reason": "Error occurred during JSON parsing",
-            "violated_criteria": []
+            "violated_criteria": [],
         }
+
 
 def parse_output():
     """Save flagged tweets to CSV file"""
@@ -123,7 +127,9 @@ def parse_output():
         batch_end = min(batch_start + batch_size, len(tweets))
         batch = tweets[batch_start:batch_end]
 
-        logger.info(f"Processing batch {batch_start // batch_size + 1} (tweets {batch_start + 1}-{batch_end}/{len(tweets)})")
+        logger.info(
+            f"Processing batch {batch_start // batch_size + 1} (tweets {batch_start + 1}-{batch_end}/{len(tweets)})"
+        )
 
         for idx, tweet in enumerate(batch, start=batch_start + 1):
             result = analyse_tweet(tweet["full_text"])
@@ -132,12 +138,14 @@ def parse_output():
                 continue
 
             if result.get("flagged") is True:
-                flagged.append({
-                    **tweet,
-                    "reason": result.get("reason", ""),
-                    "confidence": result.get("confidence", 0.0),
-                    "violated_criteria": result.get("violated_criteria", []),
-                })
+                flagged.append(
+                    {
+                        **tweet,
+                        "reason": result.get("reason", ""),
+                        "confidence": result.get("confidence", 0.0),
+                        "violated_criteria": result.get("violated_criteria", []),
+                    }
+                )
 
         if flagged:
             logger.info(f"Found {len(flagged)} flagged tweets so far. Saving...")

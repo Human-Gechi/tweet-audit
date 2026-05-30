@@ -7,15 +7,17 @@ from log import tweet_logger
 logger = tweet_logger()
 config = load_config()
 
+
 def run():
-  """ Program main entry point"""
-  logger.info("="*25)
-  logger.info("Starting tweets auditing")
-  logger.info("="*25)
+    """Program main entry point"""
+    logger.info("=" * 25)
+    logger.info("Starting tweets auditing")
+    logger.info("=" * 25)
 
-  unzip_tweet = unzip(config["archive_settings"]["archive_path"])
-  validate_config = validate()
+    unzip(config["archive_settings"]["archive_path"])
+    validate()
 
-  gemini_output = parse_output()
+    parse_output()
+
 
 run()

@@ -5,6 +5,7 @@ import os
 from log import tweet_logger
 from src.utils.config_validate import load_config
 from datetime import datetime
+
 logger = tweet_logger()
 config = load_config()
 
@@ -20,7 +21,7 @@ def _load_json():
     with open("tweet_data/data/tweets.js", "r", encoding="utf-8") as data:
         content = data.read()
 
-    json_string = content[content.find('['):content.rfind(']') + 1]
+    json_string = content[content.find("[") : content.rfind("]") + 1]
 
     try:
         tweets = json.loads(json_string)
@@ -56,8 +57,9 @@ def _is_too_short(tweets: str):
         tweet_data = tweet.get("tweet", {})
         full_text = tweet_data.get("full_text", "")
         if len(full_text) < min_length:
-                return True
+            return True
         return False
+
 
 def _parse_created_at(tweets: str):
     "Convert date/time to python datetime"
@@ -68,8 +70,9 @@ def _parse_created_at(tweets: str):
         py_date = datetime.strptime(created_at, date_format)
         return py_date
 
+
 def process_tweets() -> list[dict]:
-    """ Funtion to return needed key:vale pairs to process dicts"""
+    """Funtion to return needed key:vale pairs to process dicts"""
     tweets_list = _load_json()
     processed = []
 
@@ -80,22 +83,25 @@ def process_tweets() -> list[dict]:
             full_text = tweet_data.get("full_text", "")
 
             if not id_str or not full_text:
-                logger.warning(f"Skipping tweet with missing id_str or full_text")
+                logger.warning("Skipping tweet with missing id_str or full_text")
                 continue
 
             status = _get_tweet_status(tweet_data)
             url = _build_url(id_str)
             created_at = _parse_created_at(tweets_list)
 
-            processed.append({
-                "url": url,
-                "full_text": full_text,
-                "status": status,
-                "created_at": created_at
-            })
+            processed.append(
+                {
+                    "url": url,
+                    "full_text": full_text,
+                    "status": status,
+                    "created_at": created_at,
+                }
+            )
 
     logger.info(f"Processed {len(processed)} tweets")
     return processed
+
 
 def output_csv(flagged_tweets: list[dict]) -> None:
     """CSV file output parser"""
@@ -108,7 +114,10 @@ def output_csv(flagged_tweets: list[dict]) -> None:
 
     for item in flagged_tweets:
         for key in item.keys():
-            if key not in  {"url", "full_text", "status", "created_at"} and key not in extra_fields:
+            if (
+                key not in {"url", "full_text", "status", "created_at"}
+                and key not in extra_fields
+            ):
                 extra_fields.append(key)
 
     fieldnames = base_fields + extra_fields

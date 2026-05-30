@@ -10,10 +10,11 @@ config_path = Path("config.json")
 VALID_GROQ_MODELS = [
     "llama-3.3-70b-versatile",
     "llama-3.1-8b-instant",
-    "meta-llama/llama-4-scout-17b-16e-instruct"
+    "meta-llama/llama-4-scout-17b-16e-instruct",
 ]
 
 logger = tweet_logger()
+
 
 def _clean_string_list(items: list, field: str) -> list[str]:
     """
@@ -55,6 +56,7 @@ def _require_env_fallback(config: dict) -> dict:
         config["groq_api_key"] = env_key
 
     return config
+
 
 def _validate_criteria(c: dict) -> dict:
     "Validate these criterias exists in the config file"
@@ -109,14 +111,14 @@ def _validate_groq(g: dict) -> tuple[dict, list[str]]:
 
 
 def _validate_output(o: dict) -> tuple[dict, list[str]]:
-    """ Validate output configurations are present in the file"""
+    """Validate output configurations are present in the file"""
     errors: list[str] = []
 
     filename = o.get("filename", "")
     if not filename.endswith(".csv"):
         errors.append(f"output_settings.filename must end with .csv, got {filename!r}")
 
-    if not re.match(r'^[\w\-. ]+$', filename):
+    if not re.match(r"^[\w\-. ]+$", filename):
         errors.append(
             f"output_settings.filename contains invalid characters: {filename!r}"
         )
@@ -130,6 +132,7 @@ def _validate_output(o: dict) -> tuple[dict, list[str]]:
 
     return o, errors
 
+
 def _validate_archive(a: dict) -> tuple[dict, list[str]]:
     "Validate tweet archive file configurations exists"
     errors: list[str] = []
@@ -141,8 +144,9 @@ def _validate_archive(a: dict) -> tuple[dict, list[str]]:
         )
     return a, errors
 
+
 def load_config() -> dict:
-    """ Load the contents onf th config file """
+    """Load the contents onf th config file"""
     global config_path
     if not config_path.exists():
         raise FileNotFoundError(
@@ -157,14 +161,17 @@ def load_config() -> dict:
             raise ValueError(f"config.json is not valid JSON: {exc}") from exc
         return raw
 
+
 def validate() -> None:
-    " Program entry point to run all functions"
+    "Program entry point to run all functions"
     config = load_config()
     config = _require_env_fallback(config)
 
     all_errors: list[str] = []
 
-    config["alignment_criteria"], errs = _validate_criteria(config["alignment_criteria"])
+    config["alignment_criteria"], errs = _validate_criteria(
+        config["alignment_criteria"]
+    )
     all_errors.extend(errs)
 
     config["gemini_settings"], errs = _validate_groq(config["groq_settings"])
@@ -178,8 +185,9 @@ def validate() -> None:
 
     if all_errors:
         bullet_list = "\n  • ".join(all_errors)
-        raise ValueError(f"config.json has {len(all_errors)} error(s):\n  • {bullet_list}")
+        raise ValueError(
+            f"config.json has {len(all_errors)} error(s):\n  • {bullet_list}"
+        )
 
     logger.info("config: loaded successfully from %s", config_path.resolve())
     return config
-

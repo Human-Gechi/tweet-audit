@@ -4,27 +4,31 @@ config = load_config()
 
 
 def build_prompt(full_text: str) -> str:
-   "Function to build Groq prompt with system configurations and prompt detailing how the llm API should behave"
-   criteria = config["alignment_criteria"]
-   account = config["account_context"]
-   prompt_settings = config["prompt_settings"]
+    "Function to build Groq prompt with system configurations and prompt detailing how the llm API should behave"
+    criteria = config["alignment_criteria"]
+    account = config["account_context"]
+    prompt_settings = config["prompt_settings"]
 
-   forbidden_words = ", ".join(criteria["forbidden_words"])
-   forbidden_phrases = ", ".join(f'"{p}"' for p in criteria["forbidden_phrases"])
-   disallowed_topics = ", ".join(criteria["disallowed_topics"])
+    forbidden_words = ", ".join(criteria["forbidden_words"])
+    forbidden_phrases = ", ".join(f'"{p}"' for p in criteria["forbidden_phrases"])
+    disallowed_topics = ", ".join(criteria["disallowed_topics"])
 
-   require_reasoning = prompt_settings["require_reasoning"]
-   reasoning_detail = prompt_settings["reasoning_detail"]
-   flag_threshold = prompt_settings["flag_threshold"]
+    require_reasoning = prompt_settings["require_reasoning"]
+    reasoning_detail = prompt_settings["reasoning_detail"]
+    flag_threshold = prompt_settings["flag_threshold"]
 
-   reasoning_instruction = ""
-   if require_reasoning:
-      if reasoning_detail == "concise":
-         reasoning_instruction = "one sentence explaining why it was flagged, or null if not flagged"
-      else:
-         reasoning_instruction = "a detailed explanation of why it was flagged, or null if not flagged"
+    reasoning_instruction = ""
+    if require_reasoning:
+        if reasoning_detail == "concise":
+            reasoning_instruction = (
+                "one sentence explaining why it was flagged, or null if not flagged"
+            )
+        else:
+            reasoning_instruction = (
+                "a detailed explanation of why it was flagged, or null if not flagged"
+            )
 
-   prompt = f"""
+    prompt = f"""
 ACCOUNT CONTEXT:
 This account belongs to {account["account_purpose"]}.
 The account tone is {account["account_tone"]}.
@@ -73,7 +77,7 @@ RESPOND WITH ONLY THIS JSON AND NOTHING ELSE:
   "violated_criteria": []
 }}
 """
-   return prompt.strip()
+    return prompt.strip()
 
 
 def get_system_instruction() -> str:
