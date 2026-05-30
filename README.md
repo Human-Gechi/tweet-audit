@@ -72,7 +72,7 @@ The run flow in [src/main.py](src/main.py):
 
 ## Output
 
-Flagged tweets are saved to the path defined in `output_settings` (example output: [output/flagged_tweets.csv](output/flagged_tweets.csv)).
+Flagged tweets are saved to the path defined in `output_settings` and are saved in folder output under file `flagged_tweets.csv`
 
 ## Tests
 
