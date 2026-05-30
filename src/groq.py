@@ -3,7 +3,7 @@ import json
 import time
 import random
 
-from prompt import build_prompt, get_system_instruction
+from src.prompt import build_prompt, get_system_instruction
 from src.utils.config_validate import load_config, VALID_GROQ_MODELS
 from src.utils.helpers import process_tweets, output_csv
 from log import tweet_logger
